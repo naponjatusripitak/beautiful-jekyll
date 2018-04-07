@@ -8,7 +8,7 @@ layout: null
 
 body {
   font-family: 'Lora', 'Times New Roman', serif;
-  font-size: 18px;
+  font-size: 14px;
   color: #404040;
   position: relative;
   background-color: {{ site.page-col }};
@@ -31,8 +31,6 @@ a {
 a:hover,
 a:focus {
   color: {{ site.hover-col }};
-  text-decoration: underline;
-
 }
 blockquote {
   color: #808080;
