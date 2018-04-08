@@ -123,7 +123,7 @@ url-pretty: "naponjatusripitak.github.io"  # eg. "deanattali.com/beautiful-jekyl
 #disqus: "naponjatusripitak"
 
 # Facebook App ID
-# fb_app_id: "napontao"
+# fb_app_id: ""
 
 # Excerpt Word Length
 # Truncates the excerpt to the specified number of words on the index page
