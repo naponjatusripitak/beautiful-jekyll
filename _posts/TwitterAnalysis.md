@@ -31,7 +31,7 @@ tags: [Python, Twitter, Politics]
 
 อย่างไรก็ตาม สิ่งที่สำคัญไม่น้อยไปกว่าความเคลื่อนไหวเหล่านี้ คือภาพของสังคมไทยที่มีประชาชนเป็นตัวละครหลัก ไม่ใช่แค่ตัวละครประกอบ ที่กำลังชัดเจนขึ้นท่ามกลางความไม่ชัดเจนของความขัดแย้งระหว่างขั้วอำนาจหลักทั้งในและนอกระบบ
 
-จากการวิเคราะห์ข้อมูลจาก Twitter รวมทั้งสิ้นจำนวน 2002446 tweet ที่รวบรวมโดยการใช้ search/tweets API ระหว่างวันที่ 7-9 กุมภาพันธ์ เมื่อประมวลผลผ่านการนับจำนวน tweet ต่อนาที ของ tweet ที่มี hashtag เกี่ยวข้องโดยตรงกับเหตุการณ์ในวันที่ 8 กุมภาพันธ์ [insert] จะเห็นได้ถึงความสอดคล้องกับสถานการณ์ทางการเมืองที่เกิดขึ้น
+จากการวิเคราะห์ข้อมูลจาก Twitter รวมทั้งสิ้นจำนวน 2,002,446 tweet ที่รวบรวมโดยการใช้ search/tweets API ระหว่างวันที่ 7-9 กุมภาพันธ์ เมื่อประมวลผลผ่านการนับจำนวน tweet ต่อนาที ของ tweet ที่มี hashtag เกี่ยวข้องโดยตรงกับเหตุการณ์ในวันที่ 8 กุมภาพันธ์ [insert] จะเห็นได้ถึงความสอดคล้องกับสถานการณ์ทางการเมืองที่เกิดขึ้น
 
 <iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="https://plot.ly/~taozaze/7.embed" height="525px" width="100%"></iframe>
 
@@ -44,9 +44,8 @@ tags: [Python, Twitter, Politics]
 * จุดเปลี่ยนที่สำคัญครั้งที่สองคือ 22:40 น. วันที่ 8 กุมภาพันธ์ เมื่อมีการเผยแพร่พระราชโองการโปรดเกล้าฯ
 * พรรคอนาคตใหม่เป็นอีกหนึ่งพรรคที่ติด 10 อันดับ hashtag ในช่วงเวลานี้
 
-<iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="https://plot.ly/~taozaze/7.embed" height="525px" width="100%"></iframe>
-
-<iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="https://plot.ly/~taozaze/9.embed" height="525px" width="100%"></iframe>
+## เพิ่มเติม
+นอกจากการประเมินสถานการณ์โดยดูจากจำนวน tweet เป็นหลักแล้ว เราสามารถที่จะใช้ unsupervised learning methods ต่างๆ เช่น LDA (latent dirichlet allocation) หรือ STM (structural topic modeling) เพื่อทำการวิเคราห์ประเด็นต่างๆ ที่ได้รับความสนใจหรือถูกหยิบยกมาอภิปรายกันใน Twitter สุดท้ายคือการทำ sentiment analysis เพื่อหยั่งรู้ถึงอารมณ์และความรู้สึกที่ผู้ใช้ Twitter มีต่อเหตุการณ์ครั้งนี้ โปรดติดตามชมตอนต่อไปครับ
 
 
 ```python
