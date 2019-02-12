@@ -2,14 +2,14 @@
 layout: post
 title: เมื่อทษช.เปิดเผยตัวละครลับเป็นแคนดิเดตนายกฯ
 subtitle: วิเคราะห์สถานการณ์ทางการเมืองด้วยข้อมูลจาก Twitter
-gh-repo: naponjatusripitak/polisci490/Matichon
+gh-repo: naponjatusripitak/twitter_thai
 gh-badge: [star, fork, follow]
 tags: [Python, Twitter, Politics]
 ---
 
 ## บทนำ
 <p align="center">
-<img src="https://naponjatusripitak.github.io/twitter_thai/ไข่แมว.jpg">
+<img src="https://naponjatusripitak.github.io/img/51794219_1467312356732025_2098520179012009984_o.jpg">
 </p>
 
 เช้าวันศุกร์ที่ 8 กุมภาพันธ์ พ.ศ. 2562 ถือเป็นช่วงเวลาอันน่าลุ้นระทึก เพราะนอกจากจะมีกำหนดแถลงการณ์จากพลเอกประยุทธ์ จันทร์โอชา ผู้ได้รับคำเชิญเป็นแคนดิเดตนายกรัฐมนตรีของพรรคพลังประชารัฐแล้ว ยังมีกำหนดการยื่นบัญชีนายกรัฐมนตรีของพรรคไทยรักษาชาติ ต่อ กกต. อีกด้วย ถือเป็นการเปิดไพ่ใบใหญ่ระหว่างสองขั้วอำนาจในการเมืองไทย
