@@ -45,9 +45,15 @@ tags: [Python, Twitter, Politics]
 * พรรคอนาคตใหม่เป็นอีกหนึ่งพรรคที่ติด 10 อันดับ hashtag ในช่วงเวลานี้
 
 ## เพิ่มเติม
-นอกจากการประเมินสถานการณ์โดยดูจากจำนวน tweet เป็นหลักแล้ว เราสามารถที่จะใช้ unsupervised learning methods ต่างๆ เช่น LDA (latent dirichlet allocation) หรือ STM (structural topic modeling) เพื่อทำการวิเคราห์ประเด็นต่างๆ ที่ได้รับความสนใจหรือถูกหยิบยกมาอภิปรายกันใน Twitter สุดท้ายคือการทำ sentiment analysis เพื่อหยั่งรู้ถึงอารมณ์และความรู้สึกที่ผู้ใช้ Twitter มีต่อเหตุการณ์ครั้งนี้ โปรดติดตามชมตอนต่อไปครับ
+นอกจากการประเมินสถานการณ์โดยดูจากจำนวน tweet เป็นหลักแล้ว เราสามารถที่จะใช้ unsupervised learning methods ต่างๆ เช่น LDA (latent dirichlet allocation) หรือ STM (structural topic modeling) เพื่อทำการวิเคราะห์ประเด็นต่างๆ ที่ได้รับความสนใจ และทัศนคติทางการเมืองที่ได้รับการแสดงออกผ่าน Twitter สุดท้ายคือการทำ sentiment analysis เพื่อหยั่งรู้ถึงอารมณ์และความรู้สึกที่ผู้ใช้ Twitter มีต่อเหตุการณ์ครั้งนี้ โปรดติดตามชมตอนต่อไปครับ
 
+## Coding
+ดู code ที่ใช้ใน project นี้ได้ <a href= https://github.com/naponjatusripitak/twitter_thai>ที่นี่</a> หรือดังต่อไปนี้
 
+### ขั้นตอนแรก: Scraping data from Twitter
+ขั้นตอนนี้ได้รับแรงบันดาลใจจาก https://galeascience.wordpress.com/2016/03/18/collecting-twitter-data-with-python/ โดยใช้ Tweepy ซึ่งเป็น library ใน python ในการดึงข้อมูลจาก Twitter API
+
+ก่อนอื่นต้อง import module ต่างๆ ที่ใช้ในการรวบรวมข้อมูล และในการวิเคราะห์
 ```python
 # Import modules
 import json
@@ -67,7 +73,9 @@ import datetime
 import pytz
 from tqdm import tqdm
 ```
+หลังจากทำการสร้าง application ใน Twitter เป็นที่เรียบร้อยแล้ว เราจะได้ Token ทั้งหมด 4 ตัว ซึ่งในเชิงปฏิบัติเป็นเหมือนรหัสประจำตัว ที่เอาไว้สื่อสารกับ server
 
+เนื่องจากรหัสควรเก็บไว้เป็นความลับ เราจึงต้องเก็บไว้ในรูปแบบของ JSON ไว้ใน working directory ของเราเอง แล้วค่อยเรียกใช้เมื่อจำเป็น แทนที่จะเก็บไว้ใน code โดยตรง ดังนี้
 
 ```python
 # Create a dictionary to store your twitter credentials
@@ -77,10 +85,10 @@ twitter_cred = dict()
 # Enter your own consumer_key, consumer_secret, access_key and access_secret
 # Replacing the stars ("********")
 
-twitter_cred['CONSUMER_KEY'] = ''
-twitter_cred['CONSUMER_SECRET'] = ''
-twitter_cred['ACCESS_KEY'] = ''
-twitter_cred['ACCESS_SECRET'] = ''
+twitter_cred['CONSUMER_KEY'] = '("********")'
+twitter_cred['CONSUMER_SECRET'] = '("********")'
+twitter_cred['ACCESS_KEY'] = '("********")'
+twitter_cred['ACCESS_SECRET'] = '("********")'
 
 # Save the information to a json so that it can be reused in code without exposing
 # the secret info to public
@@ -88,27 +96,9 @@ twitter_cred['ACCESS_SECRET'] = ''
 with open('twitter_credentials.json', 'w') as secret_info:
     json.dump(twitter_cred, secret_info, indent=4, sort_keys=True)
 ```
-
+และสามารถเรียกใช้จาก python โดยใช้ function นี้
 
 ```python
-# Scraping protocol. Save this to scrape.py and run the script.
-
-# -*- coding: utf-8 -*-
-import tweepy
-from tweepy import OAuthHandler
-import json
-import datetime as dt
-import time
-import os
-import sys
-import csv
-import pandas as pd
-import numpy as np
-import pickle
-from IPython.display import display
-import matplotlib.pyplot as plt
-import seaborn as sns
-
 def load_api():
     with open('twitter_credentials.json') as cred_data:
         info = json.load(cred_data)
@@ -123,7 +113,17 @@ def load_api():
         print ("Can't Authenticate")
         sys.exit(-1)
     return api
-    
+```
+
+ต่อไปเป็นการ scrape ข้อมูลจาก Twitter โดยปกติแล้ว standard search api ถ้าใช้ user authentication จะมี rate limit อยู่ที่ 180 requests ต่อ 15 นาที โดย max query = 100 ซึ่งเท่ากับ 18,000 tweet ต่อ 15 นาที
+
+ผมได้ข้อมูลจาก <a href='https://bhaskarvk.github.io/2015/01/how-to-use-twitters-search-rest-api-most-effectively./'>ที่นี่</a> ว่า Tweepy สามารถรองรับ application-only authentication ซึ่งมี rate limit อยู่ที่ 450 requests ต่อ 15 นาที โดย max query = 100 ซึ่งเท่ากับ 45,000 tweet ต่อ 15 นาที (เร็วกว่าเดิมพอสมควร) ผมจึงเลือกใช้วิธีนี้ในการดึงข้อมูลจาก Twitter api
+
+นี่คือองค์ประกรอบหลักของ python script ที่ผมสร้่างขึ้นเพื่อ scrape ข้อมูล
+
+ส่วนแรกคือตัว function ที่เอาไว้สื่อสารกับ server 
+
+```python
 # Function for searching tweets    
 def tweet_search(api, query, max_tweets, max_id, since_id):
     searched_tweets = []
@@ -143,7 +143,11 @@ def tweet_search(api, query, max_tweets, max_id, since_id):
         print('(until:', dt.datetime.now()+dt.timedelta(minutes=15), ')')
         time.sleep(15*60)      
     return searched_tweets, max_id
+```
 
+ส่วนที่สองคือ function ที่ค้นหา id ของ tweet ที่เก่าที่สุดจากช่วงวันที่ ที่เราได้ระบุไว้ ซึ่ง id นี้ จะทำหน้าที่เหมือนเป็นจุดเริ่มต้นของการ scrape
+
+```python
 def get_tweet_id(api, date='', days_ago=9, query='a'):
     ''' Function that gets the ID of a tweet. This ID can then be
         used as a 'starting point' from which to search. The query is
@@ -165,14 +169,25 @@ def get_tweet_id(api, date='', days_ago=9, query='a'):
         print('search limit (start/stop):',tweet[0].created_at)
         # return the id of the first tweet in the list
         return tweet[0].id
+```
+
+ส่วนที่สามคือ function สำหรับการจัดเก็บข้อมูลเอาไว้ใน working directory ของเรา
         
+```python
 def write_tweets(tweets, filename):
     ''' Function that appends tweets to a file. '''
 
     with open(filename, 'a') as f:
         for tweet in tweets:
             json.dump(tweet._json, f)
-            f.write('\n')
+            f.write('\n')      
+ ```
+ 
+ ส่วนสุดท้ายคือตัว main function ที่เราใช้ในการ loop over สิ่งที่เราต้องการให้ Tweepy ค้นหาบน Twitter search
+ 
+ อันนี้ยาวนิดนึง
+ 
+ ```python
 
 def main():
     ''' This is a script that continuously searches for tweets
@@ -182,7 +197,9 @@ def main():
 
 
     ''' search variables: '''
-    search_phrases = ['#à¹àž¡à¹àž¡àž²à¹àž¥à¹àž§àžàž²àžàž­àžª', '#à¹àžàž¢àž£àž±àžàž©àž²àžàž²àžàžŽ']
+    search_phrases = ['#ไทยรักษาชาติ', '#ทรงพระสเลนเดอร์', '#เลือกตั้ง62',
+    '#เลือกตั้งปี62', '#แม่มาแล้วธานอส', '#พระราชโองการ', '#ทรงพระสแลนด์เดอร์']
+    
     time_limit = 240                          # runtime limit in hours
     max_tweets = 10000                           # number of tweets per search (will be
                                                # iterated over) - maximum is 100
@@ -269,7 +286,11 @@ def main():
 if __name__ == "__main__":
     main()
 ```
+### ขั้นตอนที่สอง: Parsing JSON data to Pandas
 
+หลังจากรวบรวมข้อมูลเรียบร้อยแล้ว ขั้นตอนต่อไปคือการเรียบเรียงข้อมูลให้อยู่ในรูปแบบที่เราสามารถวิเคราะห์ได้ง่ายๆ โดยเลือกเฉพาะข้อมูลที่เราสนใจเช่น id, created_at, text ฯลฯ
+
+อย่างแรกที่ควรทำคือการจัดเก็บข้อมูล hashtag ในแต่ละ tweet ให้อยู่ใน list จะได้ไม่ต้องใช้ string search เก็บเอาในภายหลัง
 
 ```python
 # Function for extracting hashtags into lists
@@ -281,18 +302,19 @@ def hash_parse(tweet):
     return hashes
 ```
 
+แทนที่จะโหลดไฟล์ทั้งหมดเข้าไปใน python และ append เพื่อสร้าง list อันใหญ่ ผมแนะนำให้ process ทีละบรรทัด และเขียนเข้า csv แล้วค่อยโหลดเข้า pandas อีกทีครับ
+
 
 ```python
 # Load JSON files, go through each line, extract data, and write to csv 
-tweet_files = ['#àžàž£àžàžàž£àž°àžªà¹àž¥àžà¹àžàž­àž£à¹/#àžàž£àžàžàž£àž°àžªà¹àž¥àžà¹àžàž­àž£à¹_2019-02-07_to_2019-02-08.json',
-               '#àžàž£àžàžàž£àž°à¹àžàžà¹àžàžŽàž¥/#àžàž£àžàžàž£àž°à¹àžàžà¹àžàžŽàž¥_2019-02-07_to_2019-02-08.json',
-               '#à¹àžàž¢àž£àž±àžàž©àž²àžàž²àžàžŽ/#à¹àžàž¢àž£àž±àžàž©àž²àžàž²àžàžŽ_2019-02-07_to_2019-02-08.json',
-               '#àžàž£àž°àž£àž²àžà¹àž­àžàžàž²àž£/#àžàž£àž°àž£àž²àžà¹àž­àžàžàž²àž£_2019-02-07_to_2019-02-08.json',
-               '#à¹àž¥àž·àž­àžàžàž±à¹àž62/#à¹àž¥àž·àž­àžàžàž±à¹àž62_2019-02-07_to_2019-02-08.json',
-               '#à¹àž¥àž·àž­àžàžàž±à¹àžàžàžµ62/#à¹àž¥àž·àž­àžàžàž±à¹àžàžàžµ62_2019-02-07_to_2019-02-08.json',
-               '#à¹àž¡à¹àž¡àž²à¹àž¥à¹àž§àžàž²àžàž­àžª/#à¹àž¡à¹àž¡àž²à¹àž¥à¹àž§àžàž²àžàž­àžª_2019-02-07_to_2019-02-08.json'
+tweet_files = ['#ทรงพระสเลนเดอร์/#ทรงพระสเลนเดอร์_2019-02-07_to_2019-02-08.json',
+               '#ทรงพระแคนเซิล/#ทรงพระแคนเซิล_2019-02-07_to_2019-02-08.json',
+               '#ไทยรักษาชาติ/#ไทยรักษาชาติ_2019-02-07_to_2019-02-08.json',
+               '#พระราชโองการ/#พระราชโองการ_2019-02-07_to_2019-02-08.json',
+               '#เลือกตั้ง62/#เลือกตั้ง62_2019-02-07_to_2019-02-08.json',
+               '#เลือกตั้งปี62/#เลือกตั้งปี62_2019-02-07_to_2019-02-08.json',
+               '#แม่มาแล้วธานอส/#แม่มาแล้วธานอส_2019-02-07_to_2019-02-08.json'
               ]
-
 f = open('tweets.csv', 'w')
 writer = csv.writer(f)
 for file in tweet_files:
@@ -314,6 +336,14 @@ for file in tweet_files:
             writer.writerow(tweets)            
 f.close()
 ```
+### ขั้นตอนที่สาม: Analysis and Visualization
+
+
+
+
+
+
+
 
 
 ```python
@@ -350,10 +380,26 @@ def count_hashtags(df):
 
 
 ```python
+df.shape
+```
+
+
+
+
+    (2002446, 15)
+
+
+
+
+```python
 # Count hashtags and store a list of top hashtags in tags
 df_top = count_hashtags(df)
 tags = df_top[0:10].index.tolist()
+print(tags)
 ```
+
+    ['#à¹àžàž¢àž£àž±àžàž©àž²àžàž²àžàžŽ', '#àžàž£àžàžàž£àž°àžªà¹àž¥àžà¹àžàž­àž£à¹', '#à¹àž¥àž·àž­àžàžàž±à¹àž62', '#à¹àž¥àž·àž­àžàžàž±à¹àžàžàžµ62', '#àž­àžàž²àžàžà¹àž«àž¡à¹', '#à¹àž¡à¹àž¡àž²à¹àž¥à¹àž§àžàž²àžàž­àžª', '#àžàž£àž°àž£àž²àžà¹àž­àžàžàž²àž£', '#àžàž£àžàžàž£àž°àžªà¹àž¥àžàžà¹à¹àžàž­àž£à¹', '#àžàž£àž£àžàž­àžàž²àžàžà¹àž«àž¡à¹', '#à¹àž¥àž·àž­àžàžàž±à¹àž2562']
+
 
 
 ```python
@@ -372,10 +418,16 @@ df1 = grouper[[s for s in tags]].sum()
 
 
 ```python
-# Convert from wide to long format
+# Convert from wide to long format & adjust for time difference
 df1.reset_index(level=0, inplace=True)
 df1 = df1.melt(id_vars='time')
 df1['time'] = pd.to_datetime(df1['time'], format='%Y-%b-%d %H:%M:%S.%f').dt.tz_localize('UTC').dt.tz_convert('Asia/Bangkok')
+```
+
+
+```python
+# Remove timezone just in case
+df1['time'] = df1['time'].dt.tz_localize(None)
 ```
 
 
@@ -384,34 +436,9 @@ df1['time'] = pd.to_datetime(df1['time'], format='%Y-%b-%d %H:%M:%S.%f').dt.tz_l
 import plotly 
 import plotly.plotly as py
 import plotly.graph_objs as go
+key= ''
 plotly.tools.set_credentials_file(username='taozaze', api_key=key)
 ```
-
-
-```python
-# Create a plot for visualization
-for tag in tags:
-    trace + tag
-trace0 = go.Scatter(
-    x = df1['time'],
-    y = df1['value'],
-    mode = 'lines',
-    name = 'lines'
-)
-
-df1['variable']
-
-
-data = [trace0]
-py.plot(data, filename = 'basic-line', auto_open=True)
-```
-
-
-
-
-    'https://plot.ly/~taozaze/7'
-
-
 
 
 ```python
@@ -443,7 +470,7 @@ py.iplot(go.Figure(data=data, layout=layout), filename = 'basic-line', auto_open
 
 
 
-
+<iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="https://plot.ly/~taozaze/7.embed" height="525px" width="100%"></iframe>
 
 
 
@@ -467,4 +494,12 @@ layout = dict(title = 'Top Hashtags',
 
 py.iplot(go.Figure(data=data, layout=layout), filename = 'pandas-bar-chart', auto_open=True)
 ```
+
+
+
+
+<iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="https://plot.ly/~taozaze/9.embed" height="525px" width="100%"></iframe>
+
+
+
 
