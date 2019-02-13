@@ -338,13 +338,7 @@ f.close()
 ```
 ### ขั้นตอนที่สาม: Analysis and Visualization
 
-
-
-
-
-
-
-
+เริ่มด้วยการอ่านข้อมูล csv ที่เราได้สร้างขึ้นมาจากขั้นตอนที่แล้ว
 
 ```python
 # Applying the function
@@ -353,13 +347,14 @@ keys =  ['id', 'created_at', 'user_name', 'user_id', 'text', 'retweet_count', 'f
 df= pd.read_csv('tweets.csv', names = keys, converters={'hashtags': eval}) # use eval in order to retain list type object for hashtags
 
 ```
-
+เนื่องจาก tweet หนึ่งอันอาจมี hashtag ที่อยู่ใน search query ของเรามากกว่า 1 อัน จึงต้องทำการ drop tweet ที่ซ้ำกัน โดยใช้ id เป็นตัวประเมิน
 
 ```python
 # Drop duplicates. This is an important step since a single tweet may contain multiple hashtags and we use the search api with hashtags as our query.
 df = df.drop_duplicates(subset='id')
 ```
 
+สร้าง function สำหรับ นับจำนวน hashtag ทั้งหมด
 
 ```python
 # Function for counting hashtags
@@ -377,19 +372,7 @@ def count_hashtags(df):
     top = pd.DataFrame(Series(hashtag_list).value_counts(), columns=['count'])
     return(top)
 ```
-
-
-```python
-df.shape
-```
-
-
-
-
-    (2002446, 15)
-
-
-
+นับจำนวน hashtag ทั้งหมด และเลือกเฉพาะ top 10
 
 ```python
 # Count hashtags and store a list of top hashtags in tags
@@ -398,16 +381,16 @@ tags = df_top[0:10].index.tolist()
 print(tags)
 ```
 
-    ['#à¹àžàž¢àž£àž±àžàž©àž²àžàž²àžàžŽ', '#àžàž£àžàžàž£àž°àžªà¹àž¥àžà¹àžàž­àž£à¹', '#à¹àž¥àž·àž­àžàžàž±à¹àž62', '#à¹àž¥àž·àž­àžàžàž±à¹àžàžàžµ62', '#àž­àžàž²àžàžà¹àž«àž¡à¹', '#à¹àž¡à¹àž¡àž²à¹àž¥à¹àž§àžàž²àžàž­àžª', '#àžàž£àž°àž£àž²àžà¹àž­àžàžàž²àž£', '#àžàž£àžàžàž£àž°àžªà¹àž¥àžàžà¹à¹àžàž­àž£à¹', '#àžàž£àž£àžàž­àžàž²àžàžà¹àž«àž¡à¹', '#à¹àž¥àž·àž­àžàžàž±à¹àž2562']
+    ['#ไทยรักษาชาติ', '#ทรงพระสเลนเดอร์', '#เลือกตั้ง62', '#เลือกตั้งปี62', '#อนาคตใหม่', '#แม่มาแล้วธานอส', '#พระราชโองการ', '#ทรงพระสแลนด์เดอร์', '#พรรคอนาคตใหม่', '#เลือกตั้ง2562']
 
-
+สร้าง column จาก hashtag ดังกล่าว ถ้ามี = 1 ไม่มี = 0
 
 ```python
 # Generating columns of hashtags
 for tag in tags:
     df[tag] = df.hashtags.apply(lambda x: 1 if tag[1:] in x else 0)
 ```
-
+ทำการนับความถี่ของ hashtag ต่อนาที
 
 ```python
 # Counting hashtags per minute
@@ -415,7 +398,7 @@ df['time'] = pd.DatetimeIndex(df['created_at'])
 grouper = df.groupby([pd.Grouper(key='time', freq = '1Min')])
 df1 = grouper[[s for s in tags]].sum()
 ```
-
+แปล time series ให้อยู่ในรูปแบบยาว และจัดการเรื่อง timezone
 
 ```python
 # Convert from wide to long format & adjust for time difference
@@ -424,12 +407,11 @@ df1 = df1.melt(id_vars='time')
 df1['time'] = pd.to_datetime(df1['time'], format='%Y-%b-%d %H:%M:%S.%f').dt.tz_localize('UTC').dt.tz_convert('Asia/Bangkok')
 ```
 
-
 ```python
 # Remove timezone just in case
 df1['time'] = df1['time'].dt.tz_localize(None)
 ```
-
+ทำการ plot ด้วย Plotly
 
 ```python
 # Log in with plotly credentials
