@@ -3,7 +3,7 @@ layout: post
 title: 'Culture as Webs of Significance'
 subtitle: Beer Talk by Clifford Geertz
 gh-badge: [star, fork, follow]
-tags: [politics, quoteoftheday]
+tags: [politics, quote of theday]
 ---
 Believing, with Max Weber, that man is an animal suspended in webs of significance he himself has spun, I take culture to be those webs, and the analysis of it to be therefore not an experimental science in search of law but an interpretive one in search of meaning. 
 - Clifford Geertz
