@@ -465,19 +465,6 @@ layout = dict(
 )
 py.iplot(go.Figure(data=data, layout=layout), filename = 'slider-line', auto_open=True)
 ```
-
-    /Users/taozaze/anaconda3/lib/python3.6/site-packages/plotly/api/v1/clientresp.py:40: UserWarning:
-    
-    Estimated Draw Time Too Long
-    
-
-
-    The draw time for this plot will be slow for all clients.
-
-
-
-
-
 <iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="https://plot.ly/~taozaze/15.embed" height="525px" width="100%"></iframe>
 
 
