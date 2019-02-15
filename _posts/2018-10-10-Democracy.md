@@ -1,3 +1,9 @@
+---
+layout: post
+title: Democracy According to Joseph Schumpeter
+gh-badge: [star, fork, follow]
+tags: [politics]
+---
 The democratic method is that institutional arrangement for arriving at political decisions in which individuals acquire the power to decide by means of a competitive struggle for the people's vote.
 - Joseph Schumpeter
 
