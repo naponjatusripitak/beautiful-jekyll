@@ -1,3 +1,10 @@
+---
+layout: post
+title: 'Webs of Significance'
+gh-badge: [star, fork, follow]
+tags: [politics]
+---
+
 Believing, with Max Weber, that man is an animal suspended in webs of significance he himself has spun, I take culture to be those webs, and the analysis of it to be therefore not an experimental science in search of law but an interpretive one in search of meaning. 
 - Clifford Geertz
 
