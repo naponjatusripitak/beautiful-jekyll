@@ -6,6 +6,10 @@ gh-repo: naponjatusripitak/twitter_thai
 gh-badge: [star, fork, follow]
 tags: [Python, Twitter, Politics]
 ---
+### ขั้นตอนแรก: Scraping data from Twitter
+ขั้นตอนนี้ได้รับแรงบันดาลใจจาก https://galeascience.wordpress.com/2016/03/18/collecting-twitter-data-with-python/ โดยใช้ Tweepy ซึ่งเป็น library ใน python ในการดึงข้อมูลจาก Twitter API
+
+ก่อนอื่นต้อง import module ต่างๆ ที่ใช้ในการรวบรวมข้อมูล และในการวิเคราะห์
 
 ```python
 # Import modules
@@ -27,6 +31,9 @@ import pytz
 from tqdm import tqdm
 ```
 
+หลังจากทำการสร้าง application ใน Twitter เป็นที่เรียบร้อยแล้ว เราจะได้ Token ทั้งหมด 4 ตัว ซึ่งในเชิงปฏิบัติเป็นเหมือนรหัสประจำตัว ที่เอาไว้สื่อสารกับ server
+
+เนื่องจากรหัสควรเก็บไว้เป็นความลับ เราจึงต้องเก็บไว้ในรูปแบบของ JSON ไว้ใน working directory ของเราเอง แล้วค่อยเรียกใช้เมื่อจำเป็น แทนที่จะเก็บไว้ใน code โดยตรง ดังนี้
 
 ```python
 # Create a dictionary to store your twitter credentials
@@ -36,10 +43,10 @@ twitter_cred = dict()
 # Enter your own consumer_key, consumer_secret, access_key and access_secret
 # Replacing the stars ("********")
 
-twitter_cred['CONSUMER_KEY'] = ''
-twitter_cred['CONSUMER_SECRET'] = ''
-twitter_cred['ACCESS_KEY'] = ''
-twitter_cred['ACCESS_SECRET'] = ''
+twitter_cred['CONSUMER_KEY'] = '("********")'
+twitter_cred['CONSUMER_SECRET'] = '("********")'
+twitter_cred['ACCESS_KEY'] = '("********")'
+twitter_cred['ACCESS_SECRET'] = '("********")'
 
 # Save the information to a json so that it can be reused in code without exposing
 # the secret info to public
@@ -47,27 +54,9 @@ twitter_cred['ACCESS_SECRET'] = ''
 with open('twitter_credentials.json', 'w') as secret_info:
     json.dump(twitter_cred, secret_info, indent=4, sort_keys=True)
 ```
-
+และสามารถเรียกใช้จาก python โดยใช้ function นี้
 
 ```python
-# Scraping protocol. Save this to scrape.py and run the script.
-
-# -*- coding: utf-8 -*-
-import tweepy
-from tweepy import OAuthHandler
-import json
-import datetime as dt
-import time
-import os
-import sys
-import csv
-import pandas as pd
-import numpy as np
-import pickle
-from IPython.display import display
-import matplotlib.pyplot as plt
-import seaborn as sns
-
 def load_api():
     with open('twitter_credentials.json') as cred_data:
         info = json.load(cred_data)
@@ -82,13 +71,23 @@ def load_api():
         print ("Can't Authenticate")
         sys.exit(-1)
     return api
-    
+```
+
+ต่อไปเป็นการ scrape ข้อมูลจาก Twitter โดยปกติแล้ว standard search api ถ้าใช้ user authentication จะมี rate limit อยู่ที่ 180 requests ต่อ 15 นาที โดย max query = 100 ซึ่งเท่ากับ 18,000 tweet ต่อ 15 นาที
+
+ผมได้ข้อมูลจาก <a href='https://bhaskarvk.github.io/2015/01/how-to-use-twitters-search-rest-api-most-effectively./'>ที่นี่</a> ว่า Tweepy สามารถรองรับ application-only authentication ซึ่งมี rate limit อยู่ที่ 450 requests ต่อ 15 นาที โดย max query = 100 ซึ่งเท่ากับ 45,000 tweet ต่อ 15 นาที (เร็วกว่าเดิมพอสมควร) ผมจึงเลือกใช้วิธีนี้ในการดึงข้อมูลจาก Twitter api
+
+นี่คือองค์ประกรอบหลักของ python script ที่ผมสร้่างขึ้นเพื่อ scrape ข้อมูล
+
+ส่วนแรกคือตัว function ที่เอาไว้สื่อสารกับ server 
+
+```python
 # Function for searching tweets    
 def tweet_search(api, query, max_tweets, max_id, since_id):
     searched_tweets = []
     try:
         new_tweets = []
-        for tweet in tweepy.Cursor(api.search,q=query, count=100, since_id=str(since_id), max_id=str(max_id-1)).items(max_tweets):
+        for tweet in tweepy.Cursor(api.search,q=query, count=100, tweet_mode='extended', since_id=str(since_id), max_id=str(max_id-1)).items(max_tweets):
             new_tweets.append(tweet)
         print('found',len(new_tweets),'tweets', api.rate_limit_status()['resources']['search'])
         if not new_tweets:
@@ -102,7 +101,11 @@ def tweet_search(api, query, max_tweets, max_id, since_id):
         print('(until:', dt.datetime.now()+dt.timedelta(minutes=15), ')')
         time.sleep(15*60)      
     return searched_tweets, max_id
+```
 
+ส่วนที่สองคือ function ที่ค้นหา id ของ tweet ที่เก่าที่สุดจากช่วงวันที่ ที่เราได้ระบุไว้ ซึ่ง id นี้ จะทำหน้าที่เหมือนเป็นจุดเริ่มต้นของการ scrape
+
+```python
 def get_tweet_id(api, date='', days_ago=9, query='a'):
     ''' Function that gets the ID of a tweet. This ID can then be
         used as a 'starting point' from which to search. The query is
@@ -124,15 +127,25 @@ def get_tweet_id(api, date='', days_ago=9, query='a'):
         print('search limit (start/stop):',tweet[0].created_at)
         # return the id of the first tweet in the list
         return tweet[0].id
+```
+
+ส่วนที่สามคือ function สำหรับการจัดเก็บข้อมูลเอาไว้ใน working directory ของเรา
         
+```python
 def write_tweets(tweets, filename):
     ''' Function that appends tweets to a file. '''
 
     with open(filename, 'a') as f:
         for tweet in tweets:
             json.dump(tweet._json, f)
-            f.write('\n')
-
+            f.write('\n')      
+ ```
+ 
+ ส่วนสุดท้ายคือตัว main function ที่เราใช้ในการ loop over สิ่งที่เราต้องการให้ Tweepy ค้นหาบน Twitter search
+ 
+ อันนี้ยาวนิดนึง
+ 
+ ```python
 def main():
     ''' This is a script that continuously searches for tweets
         that were created over a given number of days. The search
@@ -141,7 +154,8 @@ def main():
 
 
     ''' search variables: '''
-    search_phrases = ['#ไทยรักษาชาติ', '#ทรงพระสเลนเดอร์', '#เลือกตั้ง62', '#เลือกตั้งปี62', '#แม่มาแล้วธานอส', '#พระราชโองการ', '#ทรงพระสแลนด์เดอร์', '#เลือกตั้ง2562']
+    search_phrases = ['#เลือกตั้งปี62', '#แม่มาแล้วธานอส', '#พระราชโองการ', '#ทรงพระสแลนด์เดอร์', '#เลือกตั้ง2562']
+    
     time_limit = 240                          # runtime limit in hours
     max_tweets = 10000                           # number of tweets per search (will be
                                                # iterated over) - maximum is 100
@@ -228,7 +242,11 @@ def main():
 if __name__ == "__main__":
     main()
 ```
+### ขั้นตอนที่สอง: Parsing JSON data to Pandas
 
+หลังจากรวบรวมข้อมูลเรียบร้อยแล้ว ขั้นตอนต่อไปคือการเรียบเรียงข้อมูลให้อยู่ในรูปแบบที่เราสามารถวิเคราะห์ได้ง่ายๆ โดยเลือกเฉพาะข้อมูลที่เราสนใจเช่น id, created_at, text ฯลฯ
+
+อย่างแรกที่ควรทำคือสร้าง function สำหรับการจัดเก็บข้อมูล hashtag ในแต่ละ tweet ให้อยู่ใน list จะได้ไม่ต้องใช้ string search เก็บเอาในภายหลัง
 
 ```python
 # Function for extracting hashtags into lists
@@ -240,6 +258,7 @@ def hash_parse(tweet):
     return hashes
 ```
 
+และ function สำหรับดึงข้อมูล text จาก tweet
 
 ```python
 def getText(data):       
@@ -265,6 +284,8 @@ def getText(data):
                             text = ''
     return text
 ```
+
+แทนที่จะโหลดไฟล์ทั้งหมดเข้าไปใน python และ append เพื่อสร้าง list อันใหญ่ ผมแนะนำให้ process ทีละบรรทัด และเขียนเข้า csv แล้วค่อยโหลดเข้า pandas อีกทีครับ
 
 
 ```python
@@ -302,6 +323,9 @@ for file in tweet_files:
 f.close()
 ```
 
+### ขั้นตอนที่สาม: Analysis and Visualization
+
+เริ่มด้วยการอ่านข้อมูล csv ที่เราได้สร้างขึ้นมาจากขั้นตอนที่แล้ว
 
 ```python
 # Applying the function
@@ -310,34 +334,25 @@ keys =  ['id', 'created_at', 'user_name', 'user_id', 'text', 'retweet_count', 'f
 df= pd.read_csv('tweets.csv', names = keys, converters={'hashtags': eval}) # use eval in order to retain list type object for hashtags
 
 ```
-
+เนื่องจาก tweet หนึ่งอันอาจมี hashtag ที่อยู่ใน search query ของเรามากกว่า 1 อัน จึงต้องทำการ drop tweet ที่ซ้ำกัน โดยใช้ id เป็นตัวประเมิน
 
 ```python
 # Drop duplicates. This is an important step since a single tweet may contain multiple hashtags and we use the search api with hashtags as our query.
 df = df.drop_duplicates(subset='id')
 ```
-
+แปลง 'created_at' ให้อยู่ในรูปแบบของ datetime จากนั้นจึงเปลี่ยน timezone และ filter เอาเฉพาะ tweet ระหว่างวันที่ 7 - 9
 
 ```python
 df['time'] = pd.DatetimeIndex(df['created_at'])
-```
-
-
-```python
-#df.to_pickle('tweets_pd.pkl')
-df = pd.read_pickle('tweets_pd.pkl')
-```
-
-
-```python
 df['time'] = pd.to_datetime(df['time'], format='%Y-%b-%d %H:%M:%S.%f').dt.tz_localize('UTC').dt.tz_convert('Asia/Bangkok')
-```
-
-
-```python
 df = df[(df['time'] >= '2019-02-07 00:00:00+07:00') & (df['time'] <= '2019-02-11 23:59:59+07:00')]
 ```
-
+```python
+df.shape
+```
+    (2761112, 16)
+    
+สร้าง function สำหรับ นับจำนวน hashtag ทั้งหมด
 
 ```python
 # Function for counting hashtags
@@ -355,21 +370,10 @@ def count_hashtags(df):
     top = pd.DataFrame(Series(hashtag_list).value_counts(), columns=['count'])
     return(top)
 ```
-
-
+นับจำนวน hashtag ทั้งหมด และเลือกเฉพาะ top 15
+    
 ```python
-df.shape
-```
 
-
-
-
-    (2761112, 16)
-
-
-
-
-```python
 # Count hashtags and store a list of top hashtags in tags
 df_top = count_hashtags(df)
 tags = df_top[0:15].index.tolist()
@@ -380,12 +384,14 @@ print(tags)
 
 
 
+สร้าง column จาก hashtag ดังกล่าว ถ้ามี = 1 ไม่มี = 0
+
 ```python
 # Generating columns of hashtags
 for tag in tags:
     df[tag] = df.hashtags.apply(lambda x: 1 if tag[1:] in x else 0)
 ```
-
+ทำการนับความถี่ของ hashtag ต่อนาที
 
 ```python
 # Counting hashtags per minute
@@ -393,21 +399,17 @@ for tag in tags:
 grouper = df.groupby([pd.Grouper(key='time', freq = '1Min')])
 df1 = grouper[[s for s in tags]].sum()
 ```
-
+แปล time series ให้อยู่ในรูปแบบยาว และจัดการเรื่อง timezone
 
 ```python
 # Convert from wide to long format & adjust for time difference
 df1.reset_index(level=0, inplace=True)
 df1 = df1.melt(id_vars='time')
 df1['time'] = pd.to_datetime(df1['time'], format='%Y-%b-%d %H:%M:%S.%f').dt.tz_localize('UTC').dt.tz_convert('Asia/Bangkok')
-```
-
-
-```python
 # Remove timezone just in case
 df1['time'] = df1['time'].dt.tz_localize(None)
 ```
-
+ทำการ plot ด้วย Plotly
 
 ```python
 # Log in with plotly credentials
@@ -499,10 +501,16 @@ layout = dict(title = 'Top Hashtags',
 
 py.iplot(go.Figure(data=data, layout=layout), filename = 'pandas-bar-chart', auto_open=True)
 ```
-
-
-
-
 <iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="https://plot.ly/~taozaze/9.embed" height="525px" width="100%"></iframe>
+
+
+
+
+
+
+
+
+
+
 
 
