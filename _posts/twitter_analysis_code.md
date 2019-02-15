@@ -340,7 +340,7 @@ df= pd.read_csv('tweets.csv', names = keys, converters={'hashtags': eval}) # use
 # Drop duplicates. This is an important step since a single tweet may contain multiple hashtags and we use the search api with hashtags as our query.
 df = df.drop_duplicates(subset='id')
 ```
-แปลง 'created_at' ให้อยู่ในรูปแบบของ datetime จากนั้นจึงเปลี่ยน timezone และ filter เอาเฉพาะ tweet ระหว่างวันที่ 7 - 9
+แปลง 'created_at' ให้อยู่ในรูปแบบของ datetime จากนั้นจึงเปลี่ยน timezone และ filter เอาเฉพาะ tweet ระหว่างวันที่ 7 - 11
 
 ```python
 df['time'] = pd.DatetimeIndex(df['created_at'])
