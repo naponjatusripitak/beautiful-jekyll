@@ -37,7 +37,7 @@ tags: [Python, Twitter, Politics]
 <iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="https://plot.ly/~taozaze/15.embed" height="525px" width="100%"></iframe>
 
 
-<iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="https://plot.ly/~taozaze/9.embed" height="525px" width="100%"></iframe>
+<iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="https://plot.ly/~taozaze/17.embed" height="525px" width="100%"></iframe>
 
 เราสามารถตั้งข้อสังเกตได้หลายประการ เช่น:
 * จำนวน Tweet ที่ใช้ #ไทยรักษาชาติ เริ่มติดเทรนด์ตั้งแต่คืนวันที่ 7 กุมภาพันธ์ แสดงถึงความสำเร็จของพรรคไทยรักษาชาติในการสร้างกระแสจากบัญชีนายกรัฐมนตรี
