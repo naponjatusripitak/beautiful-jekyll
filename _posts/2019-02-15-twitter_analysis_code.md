@@ -557,6 +557,11 @@ updatemenus = list([
                  args = [{'visible': [False, False, False, False, False, True]},
                          {'title': 'Top Hashtags (Feb 7-11)'}])
         ]),
+         direction = 'up',
+         xanchor = 'right',
+         yanchor = 'top',
+         x = 1,
+         y = 1
     )
 ])
 
