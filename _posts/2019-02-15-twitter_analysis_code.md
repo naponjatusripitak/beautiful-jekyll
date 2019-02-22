@@ -414,7 +414,7 @@ sns.heatmap(correlations,
     cbar_kws={'label':'correlation'})
 plt.show()
 ```
-![png](img/twitter_feb7-11_17_0.png)
+<img src="https://naponjatusripitak.github.io/img/twitter_feb7-11_17_0.png">
 
 ทำการนับความถี่ของ hashtag ต่อนาที
 
