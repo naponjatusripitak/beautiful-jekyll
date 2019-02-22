@@ -42,8 +42,8 @@ _หมายเหตุ: ข้อมูลที่ใช้ในการ�
 <iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="https://plot.ly/~taozaze/17.embed" height="525px" width="100%"></iframe>
 
 <p align="center">
+Heatmap ประกอบการวิเคราะห์ co-occurence ของ hashtag ยอดนิยม
 <img src="https://naponjatusripitak.github.io/img/twitter_feb7-11_17_0.png">
-    Heatmap ประกอบการวิเคราะห์ co-occurence ของ hashtag ยอดนิยม
 </p>
 
 เราสามารถตั้งข้อสังเกตได้หลายประการ เช่น:
