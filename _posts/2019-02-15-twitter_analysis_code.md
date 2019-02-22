@@ -387,11 +387,35 @@ print(tags)
 
 สร้าง column จาก hashtag ดังกล่าว ถ้ามี = 1 ไม่มี = 0
 
+
 ```python
 # Generating columns of hashtags
+hashtags = pd.DataFrame(columns=['column_one'])
 for tag in tags:
     df[tag] = df.hashtags.apply(lambda x: 1 if tag[1:] in x else 0)
+    hashtags[tag] = df[tag]
+hashtag_matrix = hashtags.drop('column_one', axis=1)
 ```
+
+สร้าง heatmap เพื่อดู co-occurrence ของ hashtag
+
+```python
+# Create a heatmap of hashtags to see co-occurence
+correlations = hashtag_matrix.corr()
+
+# plot the correlation matrix
+plt.figure(figsize=(10,10))
+plt.rcParams["font.family"] = "Sukhumvit Set"
+sns.heatmap(correlations,
+    cmap='RdBu',
+    vmin=-1,
+    vmax=1,
+    square = True,
+    cbar_kws={'label':'correlation'})
+plt.show()
+```
+![png](img/twitter_feb7-11_17_0.png)
+
 ทำการนับความถี่ของ hashtag ต่อนาที
 
 ```python
@@ -572,6 +596,7 @@ layout = dict(title='Top Hashtags (Feb 7-11)',
 py.iplot(go.Figure(data=data, layout=layout), filename = 'buttons-bar-chart', auto_open=True)
 ```
 <iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="https://plot.ly/~taozaze/17.embed" height="525px" width="100%"></iframe>
+
 
 
 
