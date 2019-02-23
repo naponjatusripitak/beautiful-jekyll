@@ -58,5 +58,9 @@ Heatmap ประกอบการวิเคราะห์ co-occurence ข�
 
 นอกจากนี้ ยังสามารถใช้ unsupervised learning methods ต่างๆ เช่น LDA (latent dirichlet allocation) หรือ STM (structural topic modeling) เพื่อทำการวิเคราะห์ประเด็นที่ได้รับความสนใจ และทัศนคติทางการเมืองที่ได้รับการแสดงออกผ่าน Twitter โปรดติดตามชมตอนต่อไปครับ
 
+## Sentiment Analysis
+
+<iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="https://plot.ly/~taozaze/19.embed" height="525px" width="100%"></iframe>
+
 ## Coding
 ดู code ที่ใช้ใน project นี้ได้ <a href= "https://github.com/naponjatusripitak/twitter_thai">ที่นี่</a> หรือติดตามดูได้ใน <a href= "https://naponjatusripitak.github.io/2019-02-15-twitter_analysis_code/">blog post</a> นี้
